@@ -11,7 +11,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -82,14 +84,28 @@ public class FileService {
             }
 
         }
-        Elements links = document.select("a:contains(Изменение учебных занятий)");
+        Element links = document.select(
+                String.format("a:contains(Изменение учебных занятий на %s)", findNeedDateChanges())
+        ).first();
         return findUrl(links);
     }
 
-    private String findUrl(Elements links) throws IOException {
-        HashMap<LocalDate, String> dateToUrl = new HashMap<>();
+    private String findNeedDateChanges() {
 
-        for (Element link : links) {
+        LocalDate date = LocalDate.now();
+
+        if (date.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            date = date.plusDays(3);
+        } else {
+            date = date.plusDays(1);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return date.format(formatter);
+    }
+
+    private String findUrl(Element link) throws IOException {
+        HashMap<LocalDate, String> dateToUrl = new HashMap<>();
 
             String url = link.absUrl("href");
 
@@ -100,7 +116,7 @@ public class FileService {
             LocalDate date = dateService.extractDateFromPdf(stringPdf);
 
             dateToUrl.put(date, url);
-        }
+
 
         LocalDate newDate = dateToUrl.keySet()
                                      .stream()
