@@ -40,6 +40,9 @@ public class FileService {
 
     public void downloadPdfFileFromUrl() throws IOException {
         String url = getUrlChanges();
+        if (url == null) {
+            return;
+        }
         try (InputStream in = new URL(url).openStream()) {
             Files.copy(in, Paths.get(PDF_PATH), StandardCopyOption.REPLACE_EXISTING);
         }
@@ -82,12 +85,15 @@ public class FileService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-        Element links = document.select(
+        Element link = document.select(
                 String.format("a:contains(Изменение учебных занятий на %s)", findNeedDateChanges())
         ).first();
-        return findUrl(links);
+
+        if (link != null) {
+            return findUrl(link);
+        }
+        return null;
     }
 
     private String findNeedDateChanges() {
@@ -107,16 +113,15 @@ public class FileService {
     private String findUrl(Element link) throws IOException {
         HashMap<LocalDate, String> dateToUrl = new HashMap<>();
 
-            String url = link.absUrl("href");
+        String url = link.absUrl("href");
 
-            downloadPdfFileFromUrl(url, PDF_PATH);
+        downloadPdfFileFromUrl(url, PDF_PATH);
 
-            String stringPdf = parsePdf();
+        String stringPdf = parsePdf();
 
-            LocalDate date = dateService.extractDateFromPdf(stringPdf);
+        LocalDate date = dateService.extractDateFromPdf(stringPdf);
 
-            dateToUrl.put(date, url);
-
+        dateToUrl.put(date, url);
 
         LocalDate newDate = dateToUrl.keySet()
                                      .stream()
