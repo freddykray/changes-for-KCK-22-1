@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChangesForKck221Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChangesForKck221Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ChangesForKck221Application.class, args);
+    }
 
 }

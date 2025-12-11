@@ -1,0 +1,11 @@
+services:
+  changes-bot:
+    build: .
+    container_name: changesforksk
+    ports:
+      - "8100:8100"
+    restart: always
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - TZ=Europe/Moscow
